@@ -248,6 +248,7 @@ def create_venue_submission():
   facebook_link = request.form.get('facebook_link')
   try:
     venue = Venue(name=name,city=city,state=state, address=address,phone=phone,facebook_link=facebook_link)
+    print (venue)
     db.session.add(Venue)
     db.session.commit()
   except:
