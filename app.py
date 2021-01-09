@@ -248,7 +248,6 @@ def create_venue_submission():
   address = request.form['address']
   phone = request.form['phone']
   facebook_link = request.form['facebook_link']
-  #try:
   venue = Venue(name=name,city=city,state=state, address=address,phone=phone,facebook_link=facebook_link)
   print (name)
   db.session.add(venue)
@@ -256,14 +255,6 @@ def create_venue_submission():
   db.session.close()
   # on successful db insert, flash success
   flash('Venue ' + request.form['name'] + ' was successfully listed!')
-"""   except:
-    db.session.rollback()
-    error=True
-    # on successful db insert, flash success
-    flash('Venue ' + request.form['name'] + ' was not successfully listed!')
-  finally:
-    db.session.close() """
-
 
   # TODO: on unsuccessful db insert, flash an error instead.
   # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
