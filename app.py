@@ -253,7 +253,7 @@ def create_venue_submission():
   except:
     db.session.rollback()
     error=True
-    print(sys.exc_info())
+    #print(sys.exc_info())
   finally:
     db.session.close()
 
