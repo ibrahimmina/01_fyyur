@@ -250,8 +250,8 @@ def create_venue_submission():
   facebook_link = request.form['facebook_link']
   try:
     venue = Venue(name=name,city=city,state=state, address=address,phone=phone,facebook_link=facebook_link)
-    #print (venue)
-    db.session.add(Venue)
+    print (name)
+    db.session.add(venue)
     db.session.commit()
     # on successful db insert, flash success
     flash('Venue ' + request.form['name'] + ' was successfully listed!')
