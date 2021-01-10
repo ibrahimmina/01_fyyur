@@ -213,7 +213,7 @@ def search_venues():
 
   search_term = request.form["search_term"]
   search = "%{}%".format(search_term)
-  venues = Venue.query.filter(Venue.name.like(search))
+  venues = Venue.query.filter(Venue.name.ilike(search))
 
   responce["count"] = venues.count()
   responce["data"] = []
