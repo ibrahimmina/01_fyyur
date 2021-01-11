@@ -38,6 +38,11 @@
 			<i class="fas fa-moon"></i> Not currently seeking performance venues
 		</p>
 		{% endif %}
+
+		<form action="{{ url_for('edit_artist' ,artist_id= artist.id) }}" method="get">
+			<input type="hidden" name="method" value="PUT">
+			<input type="submit" value="Edit"/>
+  		</form>
 	</div>
 	<div class="col-sm-6">
 		<img src="{{ artist.image_link }}" alt="Venue Image" />
