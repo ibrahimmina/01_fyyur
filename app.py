@@ -816,9 +816,10 @@ def shows():
 
   shows = Show.query.all()
   data = []
-  show_dictionary = {}
+  
 
   for show in shows: 
+    show_dictionary = {}
     show_dictionary["venue_id"] = show.venue_id     
     show_dictionary["venue_name"] = Venue.query.get(show.venue_id).name
     show_dictionary["artist_id"] = show.artist_id
