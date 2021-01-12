@@ -42,15 +42,20 @@
 		</p>
 		{% endif %}
 
-		<form action="{{ url_for('post_venue' ,venue_id= venue.id) }}" method="post">
-			<input type="hidden" name="method" value="DELETE">
-			<input type="submit" value="Delete"/>
-		  </form>
-		  
-		<form action="{{ url_for('edit_venue' ,venue_id= venue.id) }}" method="get">
-			<input type="hidden" name="method" value="PUT">
-			<input type="submit" value="Edit"/>
-  		</form>
+		<div class="row">
+			<div class="col-sm-6">
+				<form action="{{ url_for('post_venue' ,venue_id= venue.id) }}" method="post">
+					<input type="hidden" name="method" value="DELETE">
+					<input type="submit" value="Delete" class="btn btn-primary btn-lg btn-block"/>
+				</form>
+			</div>
+			<div class="col-sm-6">
+				<form action="{{ url_for('edit_venue' ,venue_id= venue.id) }}" method="get">
+					<input type="hidden" name="method" value="PUT">
+					<input type="submit" value="Edit" class="btn btn-primary btn-lg btn-block"/>
+				</form>
+			</div>
+		</div>
 	</div>
 	<div class="col-sm-6">
 		<img src="{{ venue.image_link }}" alt="Venue Image" />

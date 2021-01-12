@@ -288,6 +288,7 @@ def show_venue(venue_id):
     "id": venue.id,
     "name": venue.name,
     "genres": venue.genres.replace("{","").replace("}","").split(","),
+    "address": venue.address,
     "city": venue.city,
     "state": venue.state,
     "phone": venue.phone,
@@ -423,6 +424,30 @@ def create_venue_submission():
     db.session.close()
   
   return render_template('pages/home.html')
+
+
+@app.route('/artists/<artist_id>', methods=['POST'])
+def delete_artist(artist_id):
+  if (request.form['method'] == "DELETE"):
+    # TODO: Complete this endpoint for taking a venue_id, and using
+    # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
+    try:
+      artist = Artist.query.get(artist_id)
+      db.session.delete(artist)
+      db.session.commit()
+      flash('Artist ' + artist_id + ' was successfully deleted!')
+    except:
+      # TODO: on unsuccessful db insert, flash an error instead.
+      # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+      # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+      db.session.rollback()
+      flash('An error occurred. Artist ' + artist_id + ' could not be deleted.')
+    finally:
+      db.session.close()
+
+    # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
+    # clicking that button delete it from the db then redirect the user to the homepage
+    return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['POST'])
 def post_venue(venue_id):
@@ -662,16 +687,16 @@ def edit_artist_submission(artist_id):
   # artist record with ID <artist_id> using the new attributes
   try:
     artist = Artist.query.get(artist_id)
-    artist.name = request.form['name']
-    artist.city = request.form['city']
-    artist.state = request.form['state']
-    artist.phone = request.form['phone']
-    artist.facebook_link = request.form['facebook_link']
-    artist.genres = request.form.getlist('genres')   
-    artist.website = request.form['website']   
-    artist.image_link = request.form['image_link']
-    artist.seeking_description = request.form['seeking_description']
-    if (request.form['seeking_venue'] == "y"):
+    if ('name' in request.form): artist.name = request.form['name']
+    if ('city' in request.form): artist.city = request.form['city']
+    if ('state' in request.form): artist.state = request.form['state']
+    if ('phone' in request.form): artist.phone = request.form['phone']
+    if ('facebook_link' in request.form): artist.facebook_link = request.form['facebook_link']
+    if ('genres' in request.form): artist.genres = request.form.getlist('genres')   
+    if ('website' in request.form): artist.website = request.form['website']   
+    if ('image_link' in request.form): artist.image_link = request.form['image_link']
+    if ('seeking_description' in request.form): artist.seeking_description = request.form['seeking_description']
+    if ('seeking_venue' in request.form):
       artist.seeking_venue = True
     else:
       artist.seeking_venue = False
@@ -713,16 +738,16 @@ def edit_venue_submission(venue_id):
 
   try:
     venue = Venue.query.get(venue_id)
-    venue.name = request.form['name']
-    venue.city = request.form['city']
-    venue.state = request.form['state']
-    venue.phone = request.form['phone']
-    venue.facebook_link = request.form['facebook_link']
-    venue.genres = request.form.getlist('genres')  
-    venue.website = request.form['website']   
-    venue.image_link = request.form['image_link']
-    venue.seeking_description = request.form['seeking_description']
-    if (request.form['seeking_talent'] == "y"):
+    if ('name' in request.form): venue.name = request.form['name']  
+    if ('city' in request.form): venue.city = request.form['city']
+    if ('state' in request.form): venue.state = request.form['state']
+    if ('phone' in request.form): venue.phone = request.form['phone']
+    if ('facebook_link' in request.form): venue.facebook_link = request.form['facebook_link']
+    if ('genres' in request.form): venue.genres = request.form.getlist('genres')  
+    if ('website' in request.form): venue.website = request.form['website']   
+    if ('image_link' in request.form): venue.image_link = request.form['image_link']
+    if ('seeking_description' in request.form): venue.seeking_description = request.form['seeking_description']
+    if ('seeking_talent' in request.form):
       venue.seeking_talent = True
     else:
       venue.seeking_talent = False
