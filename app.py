@@ -395,21 +395,21 @@ def create_venue_form():
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
-  name = request.form['name']
-  city = request.form['city']
-  state = request.form['state']
-  address = request.form['address']
-  phone = request.form['phone']
-  image_link = request.form['image_link']
-  website = request.form['website']
-  seeking_description = request.form['seeking_description']
-  if (request.form['seeking_talent'] == "y"):
-    seeking_talent = True
-  else:
-    seeking_talent = False
-  facebook_link = request.form['facebook_link']
-  genres = request.form.getlist('genres')
   try:
+    if ('name' in request.form): name = request.form['name']
+    if ('city' in request.form): city = request.form['city']
+    if ('state' in request.form): state = request.form['state']
+    if ('address' in request.form): address = request.form['address']
+    if ('phone' in request.form): phone = request.form['phone']
+    if ('image_link' in request.form): image_link = request.form['image_link']
+    if ('website' in request.form): website = request.form['website']
+    if ('facebook_link' in request.form): facebook_link = request.form['facebook_link']
+    if ('genres' in request.form): genres = request.form.getlist('genres')
+    if ('seeking_description' in request.form): seeking_description = request.form['seeking_description']
+    if ('seeking_talent' in request.form):
+      seeking_talent = True
+    else:
+      seeking_talent = False    
     venue = Venue(name=name,city=city,state=state,image_link=image_link, website=website,seeking_description=seeking_description,seeking_talent=seeking_talent,address=address,phone=phone,facebook_link=facebook_link, genres=genres)
     db.session.add(venue)
     db.session.commit()
@@ -774,22 +774,21 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
-
-  name = request.form['name']
-  city = request.form['city']
-  state = request.form['state']
-  phone = request.form['phone']
-  facebook_link = request.form['facebook_link']
-  image_link = request.form['image_link']
-  genres = request.form.getlist('genres')
-  image_link = request.form['image_link']
-  website = request.form['website']
-  seeking_description = request.form['seeking_description']
-  if (request.form['seeking_venue'] == "y"):
-    seeking_venue = True
-  else:
-    seeking_venue = False  
   try:
+    if ('name' in request.form): name = request.form['name']
+    if ('city' in request.form): city = request.form['city']
+    if ('state' in request.form): state = request.form['state']
+    if ('phone' in request.form): phone = request.form['phone']
+    if ('facebook_link' in request.form): facebook_link = request.form['facebook_link']
+    if ('image_link' in request.form): image_link = request.form['image_link']
+    if ('genres' in request.form): genres = request.form.getlist('genres')
+    if ('image_link' in request.form): image_link = request.form['image_link']
+    if ('website' in request.form): website = request.form['website']
+    if ('seeking_description' in request.form): seeking_description = request.form['seeking_description']
+    if ('seeking_venue' in request.form):
+      seeking_venue = True
+    else:
+      seeking_venue = False      
     artist = Artist(name=name,city=city,state=state,website=website,seeking_description=seeking_description,seeking_venue=seeking_venue, phone=phone,facebook_link=facebook_link, image_link=image_link, genres=genres)
     db.session.add(artist)
     db.session.commit()
