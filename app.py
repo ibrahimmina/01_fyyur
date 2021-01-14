@@ -15,6 +15,8 @@ from forms import *
 from flask_migrate import Migrate
 from datetime import datetime
 from models import db,Venue,Artist,Show
+from sqlalchemy import func
+
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -123,17 +125,19 @@ def venues():
   # TODO: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
 
-  venues = Venue.query.group_by(Venue.id, Venue.state).all()
+  #venues = Venue.query.group_by(Venue.id, Venue.state).all()
+  venues = db.session.query(Venue.id, Venue.name, Venue.city, Venue.state,func.count(Show.id).label("num_upcoming_shows")).outerjoin(Show, Venue.id == Show.venue_id).group_by(Venue.id, Venue.state).order_by(Venue.state).all()
+  
   current_state = ""
   current_city = ""
   data = []
   main_dictionary = {}
   venue_dictionary = {}
   num_upcoming_shows = 0
-  print (len(venues))
+  #print (len(venues))
   
   for venue in venues: 
-    print (venues.index(venue))
+    #print (venues.index(venue))
     if (current_state != venue.state):
       if (current_state != ""):
         data.append(main_dictionary)
@@ -156,12 +160,12 @@ def venues():
       venue_dictionary["id"] = venue.id
       venue_dictionary["name"] = venue.name
 
-      venue_show=Show.query.filter_by(venue_id=venue.id)
-      if (venue_show.first()): 
-        for show in venue_show:
-          if (show.start_time > datetime.today()):
-            num_upcoming_shows += 1
-      venue_dictionary["num_upcoming_shows"] = num_upcoming_shows
+      #venue_show=Show.query.filter_by(venue_id=venue.id)
+      #if (venue_show.first()): 
+      #  for show in venue_show:
+      #    if (show.start_time > datetime.today()):
+      #      num_upcoming_shows += 1
+      venue_dictionary["num_upcoming_shows"] = venue.num_upcoming_shows
       
       main_dictionary["venues"].append(venue_dictionary)
 
@@ -173,12 +177,12 @@ def venues():
       venue_dictionary["id"] = venue.id
       venue_dictionary["name"] = venue.name
 
-      venue_show=Show.query.filter_by(venue_id=venue.id)
-      if (venue_show.first()): 
-        for show in venue_show:
-          if (show.start_time > datetime.today()):
-            num_upcoming_shows += 1
-      venue_dictionary["num_upcoming_shows"] = num_upcoming_shows
+      #venue_show=Show.query.filter_by(venue_id=venue.id)
+      #if (venue_show.first()): 
+      #  for show in venue_show:
+      #    if (show.start_time > datetime.today()):
+      #      num_upcoming_shows += 1
+      venue_dictionary["num_upcoming_shows"] = venue.num_upcoming_shows
 
       main_dictionary["venues"].append(venue_dictionary)
       
@@ -223,23 +227,25 @@ def search_venues():
 
   search_term = request.form["search_term"]
   search = "%{}%".format(search_term)
-  venues = Venue.query.filter(Venue.name.ilike(search))
+  venues = db.session.query(Venue.id, Venue.name, Venue.city, Venue.state,func.count(Show.id).label("num_upcoming_shows")).filter(Venue.name.ilike(search)).outerjoin(Show, Venue.id == Show.venue_id).group_by(Venue.id, Venue.state).order_by(Venue.state)
+
+  #venues = Venue.query.filter(Venue.name.ilike(search))
 
   responce["count"] = venues.count()
   responce["data"] = []
 
-  for venue in venues:
+  for venue in venues.all():
     venue_dictionary = {}
     num_upcoming_shows = 0
     venue_dictionary["id"] = venue.id
     venue_dictionary["name"] = venue.name
 
-    venue_show=Show.query.filter_by(venue_id=venue.id)
-    if (venue_show.first()): 
-      for show in venue_show:
-        if (show.start_time > datetime.today()):
-          num_upcoming_shows += 1
-    venue_dictionary["num_upcoming_shows"] = num_upcoming_shows
+    #venue_show=Show.query.filter_by(venue_id=venue.id)
+    #if (venue_show.first()): 
+    #  for show in venue_show:
+    #    if (show.start_time > datetime.today()):
+    #      num_upcoming_shows += 1
+    venue_dictionary["num_upcoming_shows"] = venue.num_upcoming_shows
 
     data_list.append(venue_dictionary)
 
@@ -260,50 +266,55 @@ def show_venue(venue_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
 
-  venue_show=Show.query.filter_by(venue_id=venue_id)
+  #venue_show=Show.query.filter_by(venue_id=venue_id)
   venue = Venue.query.filter_by(id=venue_id).first()
-  upcoming_shows = []
-  past_shows = []
 
-  if (venue_show.first()): 
+  if (venue): 
+    venue_show = db.session.query(Artist.id, Artist.name, Artist.image_link, Show.venue_id, Show.start_time).outerjoin(Show, Artist.id == Show.artist_id).filter(Show.venue_id == venue_id)
+    upcoming_shows = []
+    past_shows = []
     for show in venue_show: 
       if (show.start_time < datetime.today()):
-        artist_show = Artist.query.filter_by(id=show.artist_id).first()
+        #artist_show = Artist.query.filter_by(id=show.artist_id).first()
         show_dictionary = {
-          "artist_id" : artist_show.id, 
-          "artist_name" : artist_show.name,
-          "artist_image_link" : artist_show.image_link,
+          "artist_id" : show.id, 
+          "artist_name" : show.name,
+          "artist_image_link" : show.image_link,
           "start_time": show.start_time.strftime("%Y-%m-%dT%H:%M:%S.%f%Z")
         }
         past_shows.append(show_dictionary)
       else:
-        artist_show = Artist.query.filter_by(id=show.artist_id).first()
+        #artist_show = Artist.query.filter_by(id=show.artist_id).first()
         show_dictionary = {
-          "artist_id" : artist_show.id, 
-          "artist_name" : artist_show.name,
-          "artist_image_link" : artist_show.image_link,
+          "artist_id" :show.id, 
+          "artist_name" : show.name,
+          "artist_image_link" : show.image_link,
           "start_time": show.start_time.strftime("%Y-%m-%dT%H:%M:%S.%f%Z")
         }
         upcoming_shows.append(show_dictionary)
-  
-  data={
-    "id": venue.id,
-    "name": venue.name,
-    "genres": venue.genres.replace("{","").replace("}","").split(","),
-    "address": venue.address,
-    "city": venue.city,
-    "state": venue.state,
-    "phone": venue.phone,
-    "website": venue.website,
-    "facebook_link": venue.facebook_link,
-    "seeking_talent": venue.seeking_talent,
-    "seeking_description": venue.seeking_description,
-    "image_link": venue.image_link,
-    "past_shows": past_shows,
-    "upcoming_shows": upcoming_shows,
-    "past_shows_count": len(past_shows),
-    "upcoming_shows_count": len(upcoming_shows),
-  }  
+    
+    data={
+      "id": venue.id,
+      "name": venue.name,
+      "genres": venue.genres.replace("{","").replace("}","").split(","),
+      "address": venue.address,
+      "city": venue.city,
+      "state": venue.state,
+      "phone": venue.phone,
+      "website": venue.website,
+      "facebook_link": venue.facebook_link,
+      "seeking_talent": venue.seeking_talent,
+      "seeking_description": venue.seeking_description,
+      "image_link": venue.image_link,
+      "past_shows": past_shows,
+      "upcoming_shows": upcoming_shows,
+      "past_shows_count": len(past_shows),
+      "upcoming_shows_count": len(upcoming_shows),
+    }  
+    return render_template('pages/show_venue.html', venue=data)        
+  else:
+    return render_template('errors/404.html')
+
 
   """   data1={
       "id": 1,
@@ -383,7 +394,7 @@ def show_venue(venue_id):
       "upcoming_shows_count": 1,
     }
     data = list(filter(lambda d: d['id'] == venue_id, [data1, data2, data3]))[0] """
-  return render_template('pages/show_venue.html', venue=data)
+  
 
 #  Create Venue
 #  ----------------------------------------------------------------
@@ -507,6 +518,7 @@ def search_artists():
   search_term = request.form["search_term"]
   search = "%{}%".format(search_term)
   artists = Artist.query.filter(Artist.name.ilike(search))
+  #artists = db.session.query(Artist.id, Artist.name, func.count(Show.id).label("num_upcoming_shows")).filter(Artist.name.ilike(search)).outerjoin(Show, Artist.id == Show.artist_id).group_by(Artist.id).all()
 
   responce["count"] = artists.count()
   responce["data"] = []
