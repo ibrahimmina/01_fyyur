@@ -14,6 +14,7 @@ from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
 from datetime import datetime
+from models import db,Venue,Artist,Show
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -22,7 +23,8 @@ from datetime import datetime
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
-db = SQLAlchemy(app)
+#db = SQLAlchemy(app)
+db.init_app(app)
 
 # TODO: connect to a local postgresql database
 migrate = Migrate(app,db)
@@ -33,7 +35,7 @@ migrate = Migrate(app,db)
 # Models.
 #----------------------------------------------------------------------------#
 
-class Venue(db.Model):
+""" class Venue(db.Model):
     __tablename__ = 'Venue'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -87,7 +89,7 @@ class Show(db.Model):
     start_time = db.Column(db.DateTime, nullable=False)
 
     def as_dict(self):
-      return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+      return {c.name: getattr(self, c.name) for c in self.__table__.columns} """
 
 
 #----------------------------------------------------------------------------#
