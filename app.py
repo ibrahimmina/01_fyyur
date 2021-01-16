@@ -126,65 +126,156 @@ def venues():
   #       num_shows should be aggregated based on number of upcoming shows per venue.
 
   #venues = Venue.query.group_by(Venue.id, Venue.state).all()
-  venues = db.session.query(Venue.id, Venue.name, Venue.city, Venue.state,func.count(Show.id).label("num_upcoming_shows")).outerjoin(Show, Venue.id == Show.venue_id).group_by(Venue.id, Venue.state).order_by(Venue.state).all()
-  
-  current_state = ""
-  current_city = ""
+  venues = db.session.query(Venue.id, Venue.name, Venue.city, Venue.state,Show.start_time).outerjoin(Show, Venue.id == Show.venue_id).group_by(Venue.id, Venue.name,Venue.city, Show.start_time).order_by(Venue.city,Venue.name).all()
+ 
   data = []
   main_dictionary = {}
   venue_dictionary = {}
+  current_city = ""
+  current_venue = ""
   num_upcoming_shows = 0
-  #print (len(venues))
-  
-  for venue in venues: 
-    #print (venues.index(venue))
-    if (current_state != venue.state):
-      if (current_state != ""):
+
+
+  for venue in venues:
+    if (current_city != venue.city):
+      if (current_city != ""): 
+        main_dictionary["venues"].append(venue_dictionary)
         data.append(main_dictionary)
         main_dictionary = {}
         venue_dictionary = {}
-        num_upcoming_shows = 0
+        current_city = ""
+        current_venue = ""
+        num_upcoming_shows = 0      
+        
+        current_city = venue.city
+        current_venue = venue.name
+        
+        main_dictionary["city"] = venue.city     
+        main_dictionary["state"] = venue.state
+        main_dictionary["venues"] = []
+
+        venue_dictionary["id"] = venue.id
+        venue_dictionary["name"] = venue.name
+
+        if (venue.start_time is None):
+          num_upcoming_shows = 0
+        else:
+          if (venue.start_time > datetime.today()): 
+            num_upcoming_shows += 1
+        
+        venue_dictionary["num_upcoming_shows"] = num_upcoming_shows 
       else:
-        main_dictionary = {}
-        venue_dictionary = {}
-        num_upcoming_shows = 0        
+        current_city = venue.city
+        current_venue = venue.name
+        
+        main_dictionary["city"] = venue.city     
+        main_dictionary["state"] = venue.state
+        main_dictionary["venues"] = []
 
-      current_state = venue.state   
-      current_city = venue.city
+        venue_dictionary["id"] = venue.id
+        venue_dictionary["name"] = venue.name
 
-      main_dictionary["city"] = venue.city     
-      main_dictionary["state"] = venue.state
-      main_dictionary["venues"] = []
+        if (venue.start_time is None):
+          num_upcoming_shows = 0
 
-
-      venue_dictionary["id"] = venue.id
-      venue_dictionary["name"] = venue.name
-
-      #venue_show=Show.query.filter_by(venue_id=venue.id)
-      #if (venue_show.first()): 
-      #  for show in venue_show:
-      #    if (show.start_time > datetime.today()):
-      #      num_upcoming_shows += 1
-      venue_dictionary["num_upcoming_shows"] = venue.num_upcoming_shows
-      
-      main_dictionary["venues"].append(venue_dictionary)
-
-      if (venues.index(venue) == len(venues)-1):
-        data.append(main_dictionary)
-
+        else:
+          if (venue.start_time > datetime.today()): 
+            num_upcoming_shows += 1    
+        
+        venue_dictionary["num_upcoming_shows"] = num_upcoming_shows    
     else:
-      venue_dictionary = {}
-      venue_dictionary["id"] = venue.id
-      venue_dictionary["name"] = venue.name
+      if (current_venue != venue.name):
+        venue_dictionary["num_upcoming_shows"] = num_upcoming_shows
+        main_dictionary["venues"].append(venue_dictionary)
+        venue_dictionary = {}
+        current_venue = ""
+        num_upcoming_shows = 0     
+        
+        current_venue = venue.name
+        
+        venue_dictionary["id"] = venue.id
+        venue_dictionary["name"] = venue.name         
 
-      #venue_show=Show.query.filter_by(venue_id=venue.id)
-      #if (venue_show.first()): 
-      #  for show in venue_show:
-      #    if (show.start_time > datetime.today()):
-      #      num_upcoming_shows += 1
-      venue_dictionary["num_upcoming_shows"] = venue.num_upcoming_shows
+        if (venue.start_time is None):
+          num_upcoming_shows = 0
+        else:
+          if (venue.start_time > datetime.today()): 
+            num_upcoming_shows += 1    
+        
+        venue_dictionary["num_upcoming_shows"] = num_upcoming_shows
+      
+      else:
+        if (venue.start_time is None):
+          num_upcoming_shows = 0
+        else:
+          if (venue.start_time > datetime.today()): 
+            num_upcoming_shows += 1    
+                     
+        venue_dictionary["num_upcoming_shows"] = num_upcoming_shows
 
-      main_dictionary["venues"].append(venue_dictionary)
+  main_dictionary["venues"].append(venue_dictionary)
+  data.append(main_dictionary)
+  print (data)
+
+
+  
+  """   current_state = ""
+    current_city = ""
+    data = []
+    main_dictionary = {}
+    venue_dictionary = {}
+    num_upcoming_shows = 0
+    #print (len(venues))
+    
+    for venue in venues: 
+      #print (venues.index(venue))
+      if (current_state != venue.state):
+        if (current_state != ""):
+          data.append(main_dictionary)
+          main_dictionary = {}
+          venue_dictionary = {}
+          num_upcoming_shows = 0
+        else:
+          main_dictionary = {}
+          venue_dictionary = {}
+          num_upcoming_shows = 0        
+
+        current_state = venue.state   
+        current_city = venue.city
+
+        main_dictionary["city"] = venue.city     
+        main_dictionary["state"] = venue.state
+        main_dictionary["venues"] = []
+
+
+        venue_dictionary["id"] = venue.id
+        venue_dictionary["name"] = venue.name
+
+        #venue_show=Show.query.filter_by(venue_id=venue.id)
+        #if (venue_show.first()): 
+        #  for show in venue_show:
+        #    if (show.start_time > datetime.today()):
+        #      num_upcoming_shows += 1
+        venue_dictionary["num_upcoming_shows"] = venue.num_upcoming_shows
+        
+        main_dictionary["venues"].append(venue_dictionary)
+
+        if (venues.index(venue) == len(venues)-1):
+          data.append(main_dictionary)
+
+      else:
+        venue_dictionary = {}
+        venue_dictionary["id"] = venue.id
+        venue_dictionary["name"] = venue.name
+
+        #venue_show=Show.query.filter_by(venue_id=venue.id)
+        #if (venue_show.first()): 
+        #  for show in venue_show:
+        #    if (show.start_time > datetime.today()):
+        #      num_upcoming_shows += 1
+        venue_dictionary["num_upcoming_shows"] = venue.num_upcoming_shows
+
+        main_dictionary["venues"].append(venue_dictionary) """
       
  
       
@@ -221,35 +312,94 @@ def search_venues():
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
   
   responce = {}
-  data_list = []
-  venue_dictionary = {}
-  num_upcoming_shows = 0
+
 
   search_term = request.form["search_term"]
   search = "%{}%".format(search_term)
-  venues = db.session.query(Venue.id, Venue.name, Venue.city, Venue.state,func.count(Show.id).label("num_upcoming_shows")).filter(Venue.name.ilike(search)).outerjoin(Show, Venue.id == Show.venue_id).group_by(Venue.id, Venue.state).order_by(Venue.state)
+  #venues = db.session.query(Venue.id, Venue.name, Venue.city, Venue.state,func.count(Show.id).label("num_upcoming_shows")).filter(Venue.name.ilike(search)).outerjoin(Show, Venue.id == Show.venue_id).group_by(Venue.id, Venue.state).order_by(Venue.state)
 
   #venues = Venue.query.filter(Venue.name.ilike(search))
 
-  responce["count"] = venues.count()
-  responce["data"] = []
+  venues = db.session.query(Venue.id, Venue.name, Venue.city, Venue.state, Show.start_time).filter(Venue.name.ilike(search)).outerjoin(Show, Venue.id == Show.venue_id).group_by(Venue.id, Venue.state, Show.start_time).order_by(Venue.state)
+
+
+  
+
+  data = []
+  venue_dictionary = {}
+  current_venue = ""
+  num_upcoming_shows = 0
+  venues_count = 0
 
   for venue in venues.all():
-    venue_dictionary = {}
-    num_upcoming_shows = 0
-    venue_dictionary["id"] = venue.id
-    venue_dictionary["name"] = venue.name
 
-    #venue_show=Show.query.filter_by(venue_id=venue.id)
-    #if (venue_show.first()): 
-    #  for show in venue_show:
-    #    if (show.start_time > datetime.today()):
-    #      num_upcoming_shows += 1
-    venue_dictionary["num_upcoming_shows"] = venue.num_upcoming_shows
+    if (current_venue != venue.name):
+      if (current_venue == ""):
+        venues_count += 1
+        current_venue = venue.name
+        venue_dictionary["id"] = venue.id
+        venue_dictionary["name"] = venue.name  
 
-    data_list.append(venue_dictionary)
+        if (venue.start_time is None):
+          num_upcoming_shows = 0
+        else:
+          if (venue.start_time > datetime.today()): 
+            num_upcoming_shows += 1    
+          
+        venue_dictionary["num_upcoming_shows"] = num_upcoming_shows
+      
+      else:
+        venues_count += 1
+        data.append(venue_dictionary)
+        venue_dictionary = {}
+        
+        current_venue = venue.name
+        
+        venue_dictionary["id"] = venue.id
+        venue_dictionary["name"] = venue.name  
 
-  responce["data"] = data_list
+        if (venue.start_time is None):
+          num_upcoming_shows = 0
+        else:
+          if (venue.start_time > datetime.today()): 
+            num_upcoming_shows += 1    
+          
+        venue_dictionary["num_upcoming_shows"] = num_upcoming_shows
+
+    else:
+
+      if (venue.start_time is None):
+        num_upcoming_shows = 0
+      else:
+        if (venue.start_time > datetime.today()): 
+          num_upcoming_shows += 1    
+          
+      venue_dictionary["num_upcoming_shows"] = num_upcoming_shows
+ 
+    
+  data.append(venue_dictionary)
+  responce["data"] = data
+  responce["count"] = venues_count
+  print (data)      
+             
+  """   responce["data"] = []
+
+    for venue in venues.all():
+      venue_dictionary = {}
+      num_upcoming_shows = 0
+      venue_dictionary["id"] = venue.id
+      venue_dictionary["name"] = venue.name
+
+      #venue_show=Show.query.filter_by(venue_id=venue.id)
+      #if (venue_show.first()): 
+      #  for show in venue_show:
+      #    if (show.start_time > datetime.today()):
+      #      num_upcoming_shows += 1
+      venue_dictionary["num_upcoming_shows"] = venue.num_upcoming_shows
+
+      data_list.append(venue_dictionary) """
+
+  
 
   """   response={
       "count": 1,
@@ -511,34 +661,92 @@ def search_artists():
   # search for "band" should return "The Wild Sax Band".
 
   responce = {}
-  data_list = []
-  artist_dictionary = {}
-  num_upcoming_shows = 0
 
   search_term = request.form["search_term"]
   search = "%{}%".format(search_term)
-  artists = Artist.query.filter(Artist.name.ilike(search))
+  
+  artists = db.session.query(Artist.id, Artist.name, Show.start_time).filter(Artist.name.ilike(search)).outerjoin(Show, Artist.id == Show.artist_id).group_by(Artist.id, Show.id, Show.start_time)  
+  
+  
+  data = []
+  artist_dictionary = {}
+  current_artist = ""
+  num_upcoming_shows = 0
+  artists_count = 0
+
+  for artist in artists.all():
+
+    if (current_artist != artist.name):
+      if (current_artist == ""):
+        artists_count += 1
+        current_artist = artist.name
+        artist_dictionary["id"] = artist.id
+        artist_dictionary["name"] = artist.name  
+
+        if (artist.start_time is None):
+          num_upcoming_shows = 0
+        else:
+          if (artist.start_time > datetime.today()): 
+            num_upcoming_shows += 1    
+          
+        artist_dictionary["num_upcoming_shows"] = num_upcoming_shows
+      
+      else:
+        artists_count += 1
+        data.append(artist_dictionary)
+        artist_dictionary = {}
+        
+        current_artist = artist.name
+        
+        artist_dictionary["id"] = artist.id
+        artist_dictionary["name"] = artist.name  
+
+        if (artist.start_time is None):
+          num_upcoming_shows = 0
+        else:
+          if (artist.start_time > datetime.today()): 
+            num_upcoming_shows += 1    
+          
+        artist_dictionary["num_upcoming_shows"] = num_upcoming_shows
+
+    else:
+
+      if (artist.start_time is None):
+        num_upcoming_shows = 0
+      else:
+        if (artist.start_time > datetime.today()): 
+          num_upcoming_shows += 1    
+          
+      artist_dictionary["num_upcoming_shows"] = num_upcoming_shows
+ 
+    
+  data.append(artist_dictionary)
+  responce["data"] = data
+  responce["count"] = artists_count
+  print (data)        
+  
+  #artists = Artist.query.filter(Artist.name.ilike(search))
   #artists = db.session.query(Artist.id, Artist.name, func.count(Show.id).label("num_upcoming_shows")).filter(Artist.name.ilike(search)).outerjoin(Show, Artist.id == Show.artist_id).group_by(Artist.id).all()
 
-  responce["count"] = artists.count()
-  responce["data"] = []
+  """   responce["count"] = artists.count()
+    responce["data"] = []
 
-  for artist in artists:
-    artist_dictionary = {}
-    num_upcoming_shows = 0
-    artist_dictionary["id"] = artist.id
-    artist_dictionary["name"] = artist.name
+    for artist in artists:
+      artist_dictionary = {}
+      num_upcoming_shows = 0
+      artist_dictionary["id"] = artist.id
+      artist_dictionary["name"] = artist.name
 
-    artist_show=Show.query.filter_by(artist_id=artist.id)
-    if (artist_show.first()): 
-      for show in artist_show:
-        if (show.start_time > datetime.today()):
-          num_upcoming_shows += 1
-    artist_dictionary["num_upcoming_shows"] = num_upcoming_shows
+      artist_show=Show.query.filter_by(artist_id=artist.id)
+      if (artist_show.first()): 
+        for show in artist_show:
+          if (show.start_time > datetime.today()):
+            num_upcoming_shows += 1
+      artist_dictionary["num_upcoming_shows"] = num_upcoming_shows
 
-    data_list.append(artist_dictionary)
+      data_list.append(artist_dictionary) """
 
-  responce["data"] = data_list
+  #responce["data"] = data_list
 
   """   response={
       "count": 1,
@@ -549,6 +757,10 @@ def search_artists():
       }]
     } """
   return render_template('pages/search_artists.html', results=responce, search_term=request.form.get('search_term', ''))
+
+#### TODO From HERE
+
+
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
