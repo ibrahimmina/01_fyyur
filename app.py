@@ -766,49 +766,94 @@ def search_artists():
 def show_artist(artist_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
-  artist_show=Show.query.filter_by(artist_id=artist_id)
   artist = Artist.query.filter_by(id=artist_id).first()
-  upcoming_shows = []
-  past_shows = []
 
-  if (artist_show.first()): 
+  if (artist): 
+    artist_show = db.session.query(Venue.id, Venue.name, Venue.image_link, Show.artist_id, Show.start_time).outerjoin(Show, Venue.id == Show.venue_id).filter(Show.artist_id == artist_id).all()
+    upcoming_shows = []
+    past_shows = []
     for show in artist_show: 
       if (show.start_time < datetime.today()):
-        venue_show = Venue.query.filter_by(id=show.venue_id).first()
         show_dictionary = {
-          "venue_id" : venue_show.id, 
-          "venue_name" : venue_show.name,
-          "venue_image_link" : venue_show.image_link,
+          "venue_id" : show.id, 
+          "venue_name" : show.name,
+          "venue_image_link" : show.image_link,
           "start_time": show.start_time.strftime("%Y-%m-%dT%H:%M:%S.%f%Z")
         }
         past_shows.append(show_dictionary)
       else:
-        venue_show = Venue.query.filter_by(id=show.venue_id).first()
         show_dictionary = {
-          "venue_id" : venue_show.id, 
-          "venue_name" : venue_show.name,
-          "venue_image_link" : venue_show.image_link,
+          "venue_id" :show.id, 
+          "venue_name" : show.name,
+          "venue_image_link" : show.image_link,
           "start_time": show.start_time.strftime("%Y-%m-%dT%H:%M:%S.%f%Z")
         }
         upcoming_shows.append(show_dictionary)
+    
+    data={
+      "id": artist.id,
+      "name": artist.name,
+      "genres": artist.genres.replace("{","").replace("}","").split(","),
+      "city": artist.city,
+      "state": artist.state,
+      "phone": artist.phone,
+      "website": artist.website,
+      "facebook_link": artist.facebook_link,
+      "seeking_venue": artist.seeking_venue,
+      "seeking_description": artist.seeking_description,
+      "image_link": artist.image_link,
+      "past_shows": past_shows,
+      "upcoming_shows": upcoming_shows,
+      "past_shows_count": len(past_shows),
+      "upcoming_shows_count": len(upcoming_shows),
+    }  
+    return render_template('pages/show_artist.html', artist=data)        
+  else:
+    return render_template('errors/404.html')
 
-  data={
-    "id": artist.id,
-    "name": artist.name,
-    "genres": artist.genres.replace("{","").replace("}","").split(","),
-    "city": artist.city,
-    "state": artist.state,
-    "phone": artist.phone,
-    "website": artist.website,
-    "facebook_link": artist.facebook_link,
-    "seeking_venue": artist.seeking_venue,
-    "seeking_description": artist.seeking_description,
-    "image_link": artist.image_link,
-    "past_shows": past_shows,
-    "upcoming_shows": upcoming_shows,
-    "past_shows_count": len(past_shows),
-    "upcoming_shows_count": len(upcoming_shows),
-  }  
+  """   artist_show=Show.query.filter_by(artist_id=artist_id)
+    artist = Artist.query.filter_by(id=artist_id).first()
+    upcoming_shows = []
+    past_shows = []
+
+    if (artist_show.first()): 
+      for show in artist_show: 
+        if (show.start_time < datetime.today()):
+          venue_show = Venue.query.filter_by(id=show.venue_id).first()
+          show_dictionary = {
+            "venue_id" : venue_show.id, 
+            "venue_name" : venue_show.name,
+            "venue_image_link" : venue_show.image_link,
+            "start_time": show.start_time.strftime("%Y-%m-%dT%H:%M:%S.%f%Z")
+          }
+          past_shows.append(show_dictionary)
+        else:
+          venue_show = Venue.query.filter_by(id=show.venue_id).first()
+          show_dictionary = {
+            "venue_id" : venue_show.id, 
+            "venue_name" : venue_show.name,
+            "venue_image_link" : venue_show.image_link,
+            "start_time": show.start_time.strftime("%Y-%m-%dT%H:%M:%S.%f%Z")
+          }
+          upcoming_shows.append(show_dictionary)
+
+    data={
+      "id": artist.id,
+      "name": artist.name,
+      "genres": artist.genres.replace("{","").replace("}","").split(","),
+      "city": artist.city,
+      "state": artist.state,
+      "phone": artist.phone,
+      "website": artist.website,
+      "facebook_link": artist.facebook_link,
+      "seeking_venue": artist.seeking_venue,
+      "seeking_description": artist.seeking_description,
+      "image_link": artist.image_link,
+      "past_shows": past_shows,
+      "upcoming_shows": upcoming_shows,
+      "past_shows_count": len(past_shows),
+      "upcoming_shows_count": len(upcoming_shows),
+    }   """
 
   """   data1={
       "id": 4,
@@ -882,7 +927,7 @@ def show_artist(artist_id):
       "upcoming_shows_count": 3,
     }
     data = list(filter(lambda d: d['id'] == artist_id, [data1, data2, data3]))[0] """
-  return render_template('pages/show_artist.html', artist=data)
+  #return render_template('pages/show_artist.html', artist=data)
 
 #  Update
 #  ----------------------------------------------------------------
