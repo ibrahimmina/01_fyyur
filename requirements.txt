@@ -31,7 +31,7 @@ Pillow==5.4.1
 psycopg2==2.8.6
 pycairo==1.16.2
 pycrypto==2.6.1
-pycups==1.9.73
+#pycups==1.9.73
 pycurl==7.43.0.2
 PyGObject==3.30.4
 PySimpleSOAP==1.16.2
