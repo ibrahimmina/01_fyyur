@@ -9,7 +9,7 @@ click==7.1.2
 cryptography==2.6.1
 #cupshelpers==1.0
 distro==1.3.0
-distro-info==0.21
+#distro-info==0.21
 entrypoints==0.3
 Flask==1.1.2
 Flask-Migrate==2.5.3
