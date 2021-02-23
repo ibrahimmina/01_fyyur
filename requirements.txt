@@ -3,7 +3,7 @@ asn1crypto==0.24.0
 Babel==2.9.0
 #Brlapi==0.6.7
 certifi==2018.8.24
-chardet==3.0.4
+#chardet==3.0.4
 #chrome-gnome-shell==0.0.0
 click==7.1.2
 cryptography==2.6.1
